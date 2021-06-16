@@ -211,12 +211,14 @@ func NewPriorityQueue(
 		opt(&options)
 	}
 
+	// 这里为什么用interface而不是直接指定类型？
 	comp := func(podInfo1, podInfo2 interface{}) bool {
 		pInfo1 := podInfo1.(*framework.QueuedPodInfo)
 		pInfo2 := podInfo2.(*framework.QueuedPodInfo)
 		return lessFn(pInfo1, pInfo2)
 	}
 
+	// lwq: 提名、任命、继任
 	if options.podNominator == nil {
 		options.podNominator = NewPodNominator()
 	}
@@ -232,12 +234,14 @@ func NewPriorityQueue(
 		moveRequestCycle:          -1,
 	}
 	pq.cond.L = &pq.lock
+	// lwq: 补偿、备份队列
 	pq.podBackoffQ = heap.NewWithRecorder(podInfoKeyFunc, pq.podsCompareBackoffCompleted, metrics.NewBackoffPodsRecorder())
 
 	return pq
 }
 
 // Run starts the goroutine to pump from podBackoffQ to activeQ
+// lwq: wait.Until的功能是啥？
 func (p *PriorityQueue) Run() {
 	go wait.Until(p.flushBackoffQCompleted, 1.0*time.Second, p.stop)
 	go wait.Until(p.flushUnschedulableQLeftover, 30*time.Second, p.stop)
@@ -328,6 +332,7 @@ func (p *PriorityQueue) AddUnschedulableIfNotPresent(pInfo *framework.QueuedPodI
 }
 
 // flushBackoffQCompleted Moves all pods from backoffQ which have completed backoff in to activeQ
+// lwq:这里的backoff是什么意思？这个函数的作用是啥？
 func (p *PriorityQueue) flushBackoffQCompleted() {
 	p.lock.Lock()
 	defer p.lock.Unlock()
@@ -348,6 +353,8 @@ func (p *PriorityQueue) flushBackoffQCompleted() {
 		}
 		p.activeQ.Add(rawPodInfo)
 		metrics.SchedulerQueueIncomingPods.WithLabelValues("active", BackoffComplete).Inc()
+		// lwq: 这里高级了，只有在return的时候才会执行，而且每次循环都会defer一个函数放到stack中（defer后进先出执行顺序）
+		// lwq TODO: 这里的broadcast的作用是啥？
 		defer p.cond.Broadcast()
 	}
 }
@@ -400,6 +407,7 @@ func (p *PriorityQueue) Pop() (*framework.QueuedPodInfo, error) {
 // isPodUpdated checks if the pod is updated in a way that it may have become
 // schedulable. It drops status of the pod and compares it with old version.
 func isPodUpdated(oldPod, newPod *v1.Pod) bool {
+	// lwq: 过滤掉不重要的比较项
 	strip := func(pod *v1.Pod) *v1.Pod {
 		p := pod.DeepCopy()
 		p.ResourceVersion = ""

@@ -147,6 +147,7 @@ func (c *Configurator) create() (*Scheduler, error) {
 		return nil, errors.New("at least one profile is required")
 	}
 	// Profiles are required to have equivalent queue sort plugins.
+	// TODO: 小于函数
 	lessFn := profiles[c.profiles[0].SchedulerName].QueueSortFunc()
 	podQueue := internalqueue.NewSchedulingQueue(
 		lessFn,

@@ -638,6 +638,7 @@ func (f *frameworkImpl) RunScorePlugins(ctx context.Context, state *framework.Cy
 		metrics.FrameworkExtensionPointDuration.WithLabelValues(score, status.Code().String(), f.profileName).Observe(metrics.SinceInSeconds(startTime))
 	}()
 	pluginToNodeScores := make(framework.PluginToNodeScores, len(f.scorePlugins))
+	// LWQ: each scorePlugin will score node, so the value of map is slice
 	for _, pl := range f.scorePlugins {
 		pluginToNodeScores[pl.Name()] = make(framework.NodeScoreList, len(nodes))
 	}
@@ -666,6 +667,7 @@ func (f *frameworkImpl) RunScorePlugins(ctx context.Context, state *framework.Cy
 	}
 
 	// Run NormalizeScore method for each ScorePlugin in parallel.
+	// LWQ: use extension for score normalize
 	parallelize.Until(ctx, len(f.scorePlugins), func(index int) {
 		pl := f.scorePlugins[index]
 		nodeScoreList := pluginToNodeScores[pl.Name()]
@@ -691,6 +693,7 @@ func (f *frameworkImpl) RunScorePlugins(ctx context.Context, state *framework.Cy
 		weight := f.pluginNameToWeightMap[pl.Name()]
 		nodeScoreList := pluginToNodeScores[pl.Name()]
 
+		// LWQ: check if score valid here
 		for i, nodeScore := range nodeScoreList {
 			// return error if score plugin returns invalid score.
 			if nodeScore.Score > framework.MaxNodeScore || nodeScore.Score < framework.MinNodeScore {

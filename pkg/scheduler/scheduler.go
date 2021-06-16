@@ -204,6 +204,7 @@ func New(client clientset.Interface,
 
 	schedulerCache := internalcache.New(30*time.Second, stopEverything)
 
+	// TODO:这里的InTree和OutTree啥意思？
 	registry := frameworkplugins.NewInTreeRegistry()
 	if err := registry.Merge(options.frameworkOutOfTreeRegistry); err != nil {
 		return nil, err
@@ -232,6 +233,7 @@ func New(client clientset.Interface,
 	var sched *Scheduler
 	source := options.schedulerAlgorithmSource
 	switch {
+	// TODO: 根据算法源或者配置策略初始化schd
 	case source.Provider != nil:
 		// Create the config from a named algorithm provider.
 		sc, err := configurator.createFromProvider(*source.Provider)
@@ -264,7 +266,7 @@ func New(client clientset.Interface,
 	default:
 		return nil, fmt.Errorf("unsupported algorithm source: %v", source)
 	}
-	// Additional tweaks to the config produced by the configurator.
+	// Additional tweaks(调整) to the config produced by the configurator.
 	sched.StopEverything = stopEverything
 	sched.client = client
 

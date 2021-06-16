@@ -37,6 +37,7 @@ type DefaultBinder struct {
 var _ framework.BindPlugin = &DefaultBinder{}
 
 // New creates a DefaultBinder.
+// LWQ: 参数中的_是什么意思？
 func New(_ runtime.Object, handle framework.Handle) (framework.Plugin, error) {
 	return &DefaultBinder{handle: handle}, nil
 }

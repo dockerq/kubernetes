@@ -141,6 +141,7 @@ func (g *genericScheduler) Schedule(ctx context.Context, fwk framework.Framework
 		return result, ErrNoNodesAvailable
 	}
 
+	// LWQ: predicate stage
 	feasibleNodes, filteredNodesStatuses, err := g.findNodesThatFitPod(ctx, fwk, state, pod)
 	if err != nil {
 		return result, err
@@ -164,11 +165,13 @@ func (g *genericScheduler) Schedule(ctx context.Context, fwk framework.Framework
 		}, nil
 	}
 
+	// LWQ: priority stage
 	priorityList, err := g.prioritizeNodes(ctx, fwk, state, pod, feasibleNodes)
 	if err != nil {
 		return result, err
 	}
 
+	// LWQ: select node from list
 	host, err := g.selectHost(priorityList)
 	trace.Step("Prioritizing done")
 

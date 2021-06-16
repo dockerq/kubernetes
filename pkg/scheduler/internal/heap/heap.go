@@ -85,6 +85,7 @@ func (h *data) Len() int { return len(h.queue) }
 
 // Swap implements swapping of two elements in the heap. This is a part of standard
 // heap interface and should never be called directly.
+// lwq: 这里没有比较i j和h.queue的长度是否越界
 func (h *data) Swap(i, j int) {
 	h.queue[i], h.queue[j] = h.queue[j], h.queue[i]
 	item := h.items[h.queue[i]]
@@ -229,6 +230,7 @@ func (h *Heap) GetByKey(key string) (interface{}, bool, error) {
 func (h *Heap) List() []interface{} {
 	list := make([]interface{}, 0, len(h.data.items))
 	for _, item := range h.data.items {
+		// 这里的len是0，cap是item长度，所以可以append
 		list = append(list, item.obj)
 	}
 	return list
