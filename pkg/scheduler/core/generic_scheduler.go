@@ -188,10 +188,14 @@ func (g *genericScheduler) Extenders() []framework.Extender {
 
 // selectHost takes a prioritized list of nodes and then picks one
 // in a reservoir sampling manner from the nodes that had the highest score.
+// LWQ: 在结果集中选择一个node，考虑到有"多个maxScore"情况，这里采用了水塘采样的方式随机选择
+// 代码很精妙，水塘采样见 https://en.wikipedia.org/wiki/Reservoir_sampling
 func (g *genericScheduler) selectHost(nodeScoreList framework.NodeScoreList) (string, error) {
 	if len(nodeScoreList) == 0 {
 		return "", fmt.Errorf("empty priorityList")
 	}
+
+	// LWQ: 下面的代码块是水塘采样的核心算法
 	maxScore := nodeScoreList[0].Score
 	selected := nodeScoreList[0].Name
 	cntOfMaxScore := 1
@@ -220,6 +224,7 @@ func (g *genericScheduler) numFeasibleNodesToFind(numAllNodes int32) (numNodes i
 
 	adaptivePercentage := g.percentageOfNodesToScore
 	if adaptivePercentage <= 0 {
+		// LWQ: 计算百分比
 		basePercentageOfNodesToScore := int32(50)
 		adaptivePercentage = basePercentageOfNodesToScore - numAllNodes/125
 		if adaptivePercentage < minFeasibleNodesPercentageToFind {
@@ -391,6 +396,7 @@ func addNominatedPods(ctx context.Context, ph framework.PreemptHandle, pod *v1.P
 	stateOut := state.Clone()
 	podsAdded := false
 	for _, p := range nominatedPods {
+		// LWQ: 这里进行了优先级判断，感觉是抢占式调度部分
 		if corev1helpers.PodPriority(p) >= corev1helpers.PodPriority(pod) && p.UID != pod.UID {
 			nodeInfoOut.AddPod(p)
 			status := ph.RunPreFilterExtensionAddPod(ctx, stateOut, pod, p, nodeInfoOut)
@@ -470,6 +476,7 @@ func PodPassesFiltersOnNode(
 // The scores from each plugin are added together to make the score for that node, then
 // any extenders are run as well.
 // All scores are finally combined (added) to get the total weighted scores of all nodes
+// LWQ: 优选过程，根据评分插件和pod信息对node打分，然后选择分数最高的
 func (g *genericScheduler) prioritizeNodes(
 	ctx context.Context,
 	fwk framework.Framework,
@@ -502,6 +509,7 @@ func (g *genericScheduler) prioritizeNodes(
 		return nil, scoreStatus.AsError()
 	}
 
+	// LWQ: 打印对应评分插件和结果
 	if klog.V(10).Enabled() {
 		for plugin, nodeScoreList := range scoresMap {
 			klog.Infof("Plugin %s scores on %v/%v => %v", plugin, pod.Namespace, pod.Name, nodeScoreList)
@@ -518,6 +526,7 @@ func (g *genericScheduler) prioritizeNodes(
 		}
 	}
 
+	// LWQ: 运行扩展评分
 	if len(g.extenders) != 0 && nodes != nil {
 		var mu sync.Mutex
 		var wg sync.WaitGroup

@@ -117,9 +117,12 @@ func getDefaultConfig() *schedulerapi.Plugins {
 		},
 		Score: &schedulerapi.PluginSet{
 			Enabled: []schedulerapi.Plugin{
+				// LWQ: 让CPU和Mem使用率接近/均衡
 				{Name: noderesources.BalancedAllocationName, Weight: 1},
 				{Name: imagelocality.Name, Weight: 1},
+				// LWQ: 这个亲和性算法没看懂
 				{Name: interpodaffinity.Name, Weight: 1},
+				// LWQ: 没有使用的资源越多，得分越高，平衡Node负载
 				{Name: noderesources.LeastAllocatedName, Weight: 1},
 				{Name: nodeaffinity.Name, Weight: 1},
 				{Name: nodepreferavoidpods.Name, Weight: 10000},

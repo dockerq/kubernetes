@@ -30,6 +30,7 @@ import (
 
 // BalancedAllocation is a score plugin that calculates the difference between the cpu and memory fraction
 // of capacity, and prioritizes the host based on how close the two metrics are to each other.
+// LWQ: 平衡CPU和内存的使用率，目的是让两者的使用率更均衡/接近
 type BalancedAllocation struct {
 	handle framework.Handle
 	resourceAllocationScorer
@@ -79,6 +80,7 @@ func NewBalancedAllocation(_ runtime.Object, h framework.Handle) (framework.Plug
 }
 
 // todo: use resource weights in the scorer function
+// LWQ: 打分函数，定义在结构体resourceAllocationScorer的score字段中
 func balancedResourceScorer(requested, allocable resourceToValueMap, includeVolumes bool, requestedVolumes int, allocatableVolumes int) int64 {
 	cpuFraction := fractionOfCapacity(requested[v1.ResourceCPU], allocable[v1.ResourceCPU])
 	memoryFraction := fractionOfCapacity(requested[v1.ResourceMemory], allocable[v1.ResourceMemory])
@@ -108,6 +110,7 @@ func balancedResourceScorer(requested, allocable resourceToValueMap, includeVolu
 	// 0-MaxNodeScore with 0 representing well balanced allocation and `MaxNodeScore` poorly balanced. Subtracting it from
 	// `MaxNodeScore` leads to the score which also scales from 0 to `MaxNodeScore` while `MaxNodeScore` representing well balanced.
 	diff := math.Abs(cpuFraction - memoryFraction)
+	// LWQ: 越大该Node CPU和内存越不均衡，将Pod分配过来Node将越均衡
 	return int64((1 - diff) * float64(framework.MaxNodeScore))
 }
 

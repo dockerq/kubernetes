@@ -29,6 +29,7 @@ import (
 
 // NodePreferAvoidPods is a plugin that priorities nodes according to the node annotation
 // "scheduler.alpha.kubernetes.io/preferAvoidPods".
+// LWQ: 将Pod和Node上的controller分离，有对应controller，pod就不能运行在相关Node上
 type NodePreferAvoidPods struct {
 	handle framework.Handle
 }

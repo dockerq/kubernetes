@@ -28,6 +28,7 @@ import (
 )
 
 // LeastAllocated is a score plugin that favors nodes with fewer allocation requested resources based on requested resources.
+// LWQ: 没有使用的资源越多，得分越高，目的是让pod更"均匀"分散到node中
 type LeastAllocated struct {
 	handle framework.Handle
 	resourceAllocationScorer
@@ -75,6 +76,7 @@ func NewLeastAllocated(laArgs runtime.Object, h framework.Handle) (framework.Plu
 		return nil, err
 	}
 
+	// LWQ: 得到资源名-权重字典
 	resToWeightMap := make(resourceToWeightMap)
 	for _, resource := range (*args).Resources {
 		resToWeightMap[v1.ResourceName(resource.Name)] = resource.Weight
@@ -82,6 +84,7 @@ func NewLeastAllocated(laArgs runtime.Object, h framework.Handle) (framework.Plu
 
 	return &LeastAllocated{
 		handle: h,
+		// LWQ: 资源分配打分器
 		resourceAllocationScorer: resourceAllocationScorer{
 			Name:                LeastAllocatedName,
 			scorer:              leastResourceScorer(resToWeightMap),
@@ -98,6 +101,7 @@ func leastResourceScorer(resToWeightMap resourceToWeightMap) func(resourceToValu
 			nodeScore += resourceScore * weight
 			weightSum += weight
 		}
+		// LWQ: 资源加权评分
 		return nodeScore / weightSum
 	}
 }
@@ -105,6 +109,7 @@ func leastResourceScorer(resToWeightMap resourceToWeightMap) func(resourceToValu
 // The unused capacity is calculated on a scale of 0-MaxNodeScore
 // 0 being the lowest priority and `MaxNodeScore` being the highest.
 // The more unused resources the higher the score is.
+// LWQ: 没有使用的资源越多，得分越高，目的是让pod更"均匀"分散到node中
 func leastRequestedScore(requested, capacity int64) int64 {
 	if capacity == 0 {
 		return 0

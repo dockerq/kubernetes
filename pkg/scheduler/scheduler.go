@@ -204,7 +204,7 @@ func New(client clientset.Interface,
 
 	schedulerCache := internalcache.New(30*time.Second, stopEverything)
 
-	// TODO:这里的InTree和OutTree啥意思？
+	// LWQ: 这里的InTree和OutTree啥意思？
 	registry := frameworkplugins.NewInTreeRegistry()
 	if err := registry.Merge(options.frameworkOutOfTreeRegistry); err != nil {
 		return nil, err
@@ -233,7 +233,7 @@ func New(client clientset.Interface,
 	var sched *Scheduler
 	source := options.schedulerAlgorithmSource
 	switch {
-	// TODO: 根据算法源或者配置策略初始化schd
+	// LWQ: 根据算法源或者配置策略初始化schd
 	case source.Provider != nil:
 		// Create the config from a named algorithm provider.
 		sc, err := configurator.createFromProvider(*source.Provider)
@@ -447,6 +447,7 @@ func (sched *Scheduler) scheduleOne(ctx context.Context) {
 		return
 	}
 	pod := podInfo.Pod
+	// LWQ: 根据pod.Sepc中指定的调度器名字，返回对应的调度框架
 	fwk, err := sched.frameworkForPod(pod)
 	if err != nil {
 		// This shouldn't happen, because we only accept for scheduling the pods
@@ -463,6 +464,7 @@ func (sched *Scheduler) scheduleOne(ctx context.Context) {
 	// Synchronously attempt to find a fit for the pod.
 	start := time.Now()
 	state := framework.NewCycleState()
+	// LWQ: 这里为什么要随机设定？
 	state.SetRecordPluginMetrics(rand.Intn(100) < pluginMetricsSamplePercent)
 	schedulingCycleCtx, cancel := context.WithCancel(ctx)
 	defer cancel()

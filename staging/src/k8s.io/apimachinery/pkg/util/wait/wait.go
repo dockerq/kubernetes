@@ -140,6 +140,7 @@ func JitterUntil(f func(), period time.Duration, jitterFactor float64, sliding b
 func BackoffUntil(f func(), backoff BackoffManager, sliding bool, stopCh <-chan struct{}) {
 	var t clock.Timer
 	for {
+		// LWQ: 判断是否结束for loop
 		select {
 		case <-stopCh:
 			return
