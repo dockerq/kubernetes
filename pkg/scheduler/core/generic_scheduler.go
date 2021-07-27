@@ -526,7 +526,7 @@ func (g *genericScheduler) prioritizeNodes(
 		}
 	}
 
-	// LWQ: 运行扩展评分
+	// LWQ: 运行扩展评分，SchedulerExtender中对Score结果进行干预应该是在这里
 	if len(g.extenders) != 0 && nodes != nil {
 		var mu sync.Mutex
 		var wg sync.WaitGroup
@@ -563,6 +563,7 @@ func (g *genericScheduler) prioritizeNodes(
 		for i := range result {
 			// MaxExtenderPriority may diverge from the max priority used in the scheduler and defined by MaxNodeScore,
 			// therefore we need to scale the score returned by extenders to the score range used by the scheduler.
+			// LWQ: 将extenders中的评分和之前的评分结合在一起
 			result[i].Score += combinedScores[result[i].Name] * (framework.MaxNodeScore / extenderv1.MaxExtenderPriority)
 		}
 	}

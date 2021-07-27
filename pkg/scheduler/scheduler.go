@@ -221,7 +221,7 @@ func New(client clientset.Interface,
 		percentageOfNodesToScore: options.percentageOfNodesToScore,
 		podInitialBackoffSeconds: options.podInitialBackoffSeconds,
 		podMaxBackoffSeconds:     options.podMaxBackoffSeconds,
-		profiles:                 append([]schedulerapi.KubeSchedulerProfile(nil), options.profiles...),
+		profiles:                 append([]schedulerapi.KubeSchedulerProfile(nil), options.profiles...), // LWQ: 这种append的写法合适吗？
 		registry:                 registry,
 		nodeInfoSnapshot:         snapshot,
 		extenders:                options.extenders,
@@ -448,6 +448,7 @@ func (sched *Scheduler) scheduleOne(ctx context.Context) {
 	}
 	pod := podInfo.Pod
 	// LWQ: 根据pod.Sepc中指定的调度器名字，返回对应的调度框架
+	// 对应的调度器框架定义在Profiles中
 	fwk, err := sched.frameworkForPod(pod)
 	if err != nil {
 		// This shouldn't happen, because we only accept for scheduling the pods

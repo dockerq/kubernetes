@@ -348,6 +348,7 @@ func (h *HTTPExtender) Prioritize(pod *v1.Pod, nodes []*v1.Node) (*extenderv1.Ho
 		args      *extenderv1.ExtenderArgs
 	)
 
+	// LWQ: 如果没有这个动作，候选Nodes全部0分
 	if h.prioritizeVerb == "" {
 		result := extenderv1.HostPriorityList{}
 		for _, node := range nodes {
@@ -375,6 +376,7 @@ func (h *HTTPExtender) Prioritize(pod *v1.Pod, nodes []*v1.Node) (*extenderv1.Ho
 		NodeNames: nodeNames,
 	}
 
+	// LWQ: 发送参数到extender中进行评分，参数通过指针的方式传入，直接在send函数中修改相关值
 	if err := h.send(h.prioritizeVerb, args, &result); err != nil {
 		return nil, 0, err
 	}

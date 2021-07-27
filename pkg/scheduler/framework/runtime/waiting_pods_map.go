@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 )
@@ -61,6 +61,7 @@ func (m *waitingPodsMap) get(uid types.UID) *waitingPod {
 }
 
 // iterate acquires a read lock and iterates over the WaitingPods map.
+// LWQ: 这种回调写法值得学习借鉴
 func (m *waitingPodsMap) iterate(callback func(framework.WaitingPod)) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()

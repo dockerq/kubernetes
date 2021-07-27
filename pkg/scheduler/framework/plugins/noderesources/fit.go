@@ -223,6 +223,7 @@ type InsufficientResource struct {
 }
 
 // Fits checks if node have enough resources to host the pod.
+// LWQ: Fit算法，判断Node可分配的资源是否适配Pod请求的资源
 func Fits(pod *v1.Pod, nodeInfo *framework.NodeInfo) []InsufficientResource {
 	return fitsRequest(computePodResourceRequest(pod), nodeInfo, nil, nil)
 }
