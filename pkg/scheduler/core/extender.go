@@ -340,6 +340,8 @@ func (h *HTTPExtender) Filter(
 // Prioritize based on extender implemented priority functions. Weight*priority is added
 // up for each such priority function. The returned score is added to the score computed
 // by Kubernetes scheduler. The total score is used to do the host selection.
+// LWQ: HTTPExtender实现了pkg/scheduler/framework/extender.go->Extender接口
+// 作为Scheduler HTTPExtender使用
 func (h *HTTPExtender) Prioritize(pod *v1.Pod, nodes []*v1.Node) (*extenderv1.HostPriorityList, int64, error) {
 	var (
 		result    extenderv1.HostPriorityList

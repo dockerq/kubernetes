@@ -409,6 +409,7 @@ type BindPlugin interface {
 
 // Framework manages the set of plugins in use by the scheduling framework.
 // Configured plugins are called at specified points in a scheduling context.
+// LWQ: 调度框架接口，由pkg/scheduler/framework/runtime/framework.go中的frameworkImpl实现
 type Framework interface {
 	Handle
 	// QueueSortFunc returns the function to sort pods in scheduling queue

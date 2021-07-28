@@ -278,6 +278,7 @@ func TestGenericSchedulerWithExtenders(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			// LWQ: 初始化一个调度器，然后执行调度过程，对比预期结果
 			scheduler := NewGenericScheduler(
 				cache,
 				emptySnapshot,

@@ -504,6 +504,7 @@ func (g *genericScheduler) prioritizeNodes(
 	}
 
 	// Run the Score plugins.
+	// LWQ: scoresMap为type PluginToNodeScores map[string]NodeScoreList，评分插件和对应的Node评分列表
 	scoresMap, scoreStatus := fwk.RunScorePlugins(ctx, state, pod, nodes)
 	if !scoreStatus.IsSuccess() {
 		return nil, scoreStatus.AsError()
@@ -542,6 +543,7 @@ func (g *genericScheduler) prioritizeNodes(
 					metrics.SchedulerGoroutines.WithLabelValues("prioritizing_extender").Dec()
 					wg.Done()
 				}()
+				// LWQ: 执行扩展中的优选函数
 				prioritizedList, weight, err := g.extenders[extIndex].Prioritize(pod, nodes)
 				if err != nil {
 					// Prioritization errors from extender can be ignored, let k8s/other extenders determine the priorities

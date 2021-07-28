@@ -165,6 +165,7 @@ func (c *Configurator) create() (*Scheduler, error) {
 	)
 	debugger.ListenForSignal(c.StopEverything)
 
+	// LWQ: algo实际上是pkg/scheduler/pkg/core.go中的genericScheduler
 	algo := core.NewGenericScheduler(
 		c.schedulerCache,
 		c.nodeInfoSnapshot,

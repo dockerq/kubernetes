@@ -63,6 +63,7 @@ var configDecoder = scheme.Codecs.UniversalDecoder()
 
 // frameworkImpl is the component responsible for initializing and running scheduler
 // plugins.
+// LWQ: 具体实现调度框架接口
 type frameworkImpl struct {
 	registry              Registry
 	snapshotSharedLister  framework.SharedLister
