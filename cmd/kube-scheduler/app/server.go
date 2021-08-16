@@ -309,6 +309,7 @@ func Setup(ctx context.Context, opts *options.Options, outOfTreeRegistryOptions 
 	// Get the completed config
 	cc := c.Complete()
 
+	// LWQ: 这步插件工厂作用是什么？
 	outOfTreeRegistry := make(runtime.Registry)
 	for _, option := range outOfTreeRegistryOptions {
 		if err := option(outOfTreeRegistry); err != nil {
@@ -324,11 +325,13 @@ func Setup(ctx context.Context, opts *options.Options, outOfTreeRegistryOptions 
 		recorderFactory,
 		ctx.Done(),
 		scheduler.WithProfiles(cc.ComponentConfig.Profiles...),
+		// LWQ: 这个选项和policy-config-file相关，用来确定使用哪种算法源 AlgorithmProvider/Source
 		scheduler.WithAlgorithmSource(cc.ComponentConfig.AlgorithmSource),
 		scheduler.WithPercentageOfNodesToScore(cc.ComponentConfig.PercentageOfNodesToScore),
 		scheduler.WithFrameworkOutOfTreeRegistry(outOfTreeRegistry),
 		scheduler.WithPodMaxBackoffSeconds(cc.ComponentConfig.PodMaxBackoffSeconds),
 		scheduler.WithPodInitialBackoffSeconds(cc.ComponentConfig.PodInitialBackoffSeconds),
+		// LWQ: 可以配置多个Extender？
 		scheduler.WithExtenders(cc.ComponentConfig.Extenders...),
 		scheduler.WithParallelism(cc.ComponentConfig.Parallelism),
 		scheduler.WithBuildFrameworkCapturer(func(profile kubeschedulerconfig.KubeSchedulerProfile) {

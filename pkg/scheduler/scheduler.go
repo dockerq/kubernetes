@@ -186,6 +186,7 @@ var defaultSchedulerOptions = schedulerOptions{
 }
 
 // New returns a Scheduler
+// LWQ: opts是对默认配置的附加配置，会merge到默认配置中
 func New(client clientset.Interface,
 	informerFactory informers.SharedInformerFactory,
 	recorderFactory profile.RecorderFactory,
@@ -246,6 +247,7 @@ func New(client clientset.Interface,
 		policy := &schedulerapi.Policy{}
 		switch {
 		case source.Policy.File != nil:
+			// LWQ: 具体是这里解析policy-config-file的内容并做相关配置
 			if err := initPolicyFromFile(source.Policy.File.Path, policy); err != nil {
 				return nil, err
 			}
@@ -285,6 +287,7 @@ func initPolicyFromFile(policyFile string, policy *schedulerapi.Policy) error {
 	if err != nil {
 		return fmt.Errorf("couldn't read policy config: %v", err)
 	}
+	// LWQ: 将policy的内容解析到runtime的相关结构体中？
 	err = runtime.DecodeInto(scheme.Codecs.UniversalDecoder(), []byte(data), policy)
 	if err != nil {
 		return fmt.Errorf("invalid policy: %v", err)

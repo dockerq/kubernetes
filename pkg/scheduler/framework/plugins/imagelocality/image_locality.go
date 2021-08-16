@@ -108,7 +108,7 @@ func sumImageScores(nodeInfo *framework.NodeInfo, containers []v1.Container, tot
 // The size of the image is used as the base score, scaled by a factor which considers how much nodes the image has "spread" to.
 // This heuristic aims to mitigate the undesirable "node heating problem", i.e., pods get assigned to the same or
 // a few nodes due to image locality.
-// LWQ: 要防止pod应为image locality被调度到某几个node上
+// LWQ: 要防止pod因为image locality被调度到某几个node上
 func scaledImageScore(imageState *framework.ImageStateSummary, totalNumNodes int) int64 {
 	spread := float64(imageState.NumNodes) / float64(totalNumNodes)
 	return int64(float64(imageState.Size) * spread)

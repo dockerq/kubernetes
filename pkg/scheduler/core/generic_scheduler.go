@@ -528,6 +528,7 @@ func (g *genericScheduler) prioritizeNodes(
 	}
 
 	// LWQ: 运行扩展评分，SchedulerExtender中对Score结果进行干预应该是在这里
+	fmt.Printf("LWQ: %#v, %v\n", g.extenders, nodes)
 	if len(g.extenders) != 0 && nodes != nil {
 		var mu sync.Mutex
 		var wg sync.WaitGroup
